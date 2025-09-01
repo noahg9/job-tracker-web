@@ -9,8 +9,18 @@ export interface JobApplication {
     notes: string;
 }
 
+function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+}
+
 export async function getAllApplications(): Promise<JobApplication[]> {
-    const res = await fetch(`${API_BASE}/JobApplications`);
+    const res = await fetch(`${API_BASE}/JobApplications`, {
+        headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error("Failed to fetch job applications");
     return await res.json();
 }
@@ -18,26 +28,25 @@ export async function getAllApplications(): Promise<JobApplication[]> {
 export async function addApplication(app: JobApplication): Promise<JobApplication> {
     const res = await fetch(`${API_BASE}/JobApplications`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(app),
     });
     if (!res.ok) throw new Error("Failed to add job application");
     return await res.json();
 }
 
-// DELETE a job application by id
 export async function deleteApplication(id: number): Promise<void> {
     const res = await fetch(`${API_BASE}/JobApplications/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Failed to delete job application");
 }
 
-// UPDATE a job application by id
 export async function updateApplication(id: number, app: JobApplication): Promise<void> {
     const res = await fetch(`${API_BASE}/JobApplications/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(app),
     });
     if (!res.ok) throw new Error("Failed to update job application");

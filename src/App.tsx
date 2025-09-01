@@ -27,30 +27,26 @@ const SORT_OPTIONS = [
 type ToastType = "success" | "error";
 
 function App() {
-    // Applications state
+    // --- STATE ---
     const [apps, setApps] = useState<JobApplication[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Filter & sorting (persist in localStorage)
     const [filterStatus, setFilterStatus] = useState<number | "all">(() => {
         const saved = localStorage.getItem("filterStatus");
-        if (saved === null) return "all";
+        if (!saved) return "all";
         return saved === "all" ? "all" : Number(saved);
     });
-    const [sortOrder, setSortOrder] = useState<string>(() => {
-        return localStorage.getItem("sortOrder") ?? "dateDesc";
-    });
 
-    // Form inputs for adding
+    const [sortOrder, setSortOrder] = useState<string>(
+        () => localStorage.getItem("sortOrder") ?? "dateDesc"
+    );
+
     const [company, setCompany] = useState("");
     const [role, setRole] = useState("");
     const [status, setStatus] = useState(0);
-    const [appliedDate, setAppliedDate] = useState(
-        new Date().toISOString().substring(0, 10)
-    );
+    const [appliedDate, setAppliedDate] = useState(new Date().toISOString().substring(0, 10));
     const [notes, setNotes] = useState("");
 
-    // Editing states
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editCompany, setEditCompany] = useState("");
     const [editRole, setEditRole] = useState("");
@@ -58,39 +54,34 @@ function App() {
     const [editAppliedDate, setEditAppliedDate] = useState("");
     const [editNotes, setEditNotes] = useState("");
 
-    // Toast notification state
     const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
-
-    // Confirmation modal state
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
-    // Load apps on mount
-    useEffect(() => {
-        setLoading(true);
-        getAllApplications()
-            .then(setApps)
-            .catch(() => showToast("Failed to load applications", "error"))
-            .finally(() => setLoading(false));
-    }, []);
+    const token = localStorage.getItem("token");
 
-    // Persist filter & sort
-    useEffect(() => {
-        localStorage.setItem("filterStatus", String(filterStatus));
-    }, [filterStatus]);
-    useEffect(() => {
-        localStorage.setItem("sortOrder", sortOrder);
-    }, [sortOrder]);
-
-    // Toast helper
+    // --- TOAST ---
     const showToast = useCallback((message: string, type: ToastType = "success") => {
         setToast({ message, type });
         setTimeout(() => setToast(null), 3000);
     }, []);
 
-    // Filtered & sorted apps memoized
+    // --- FETCH APPLICATIONS ---
+    useEffect(() => {
+        if (!token) return;
+        setLoading(true);
+        getAllApplications()
+            .then(setApps)
+            .catch(() => showToast("Failed to load applications", "error"))
+            .finally(() => setLoading(false));
+    }, [token, showToast]);
+
+    // --- LOCAL STORAGE ---
+    useEffect(() => localStorage.setItem("filterStatus", String(filterStatus)), [filterStatus]);
+    useEffect(() => localStorage.setItem("sortOrder", sortOrder), [sortOrder]);
+
+    // --- FILTER & SORT ---
     const filteredApps = useMemo(() => {
-        let filtered =
-            filterStatus === "all" ? apps : apps.filter((app) => app.status === filterStatus);
+        let filtered = filterStatus === "all" ? apps : apps.filter((app) => app.status === filterStatus);
 
         switch (sortOrder) {
             case "dateAsc":
@@ -109,7 +100,14 @@ function App() {
         return filtered;
     }, [apps, filterStatus, sortOrder]);
 
-    // Add Application Handler
+    // --- LOGOUT ---
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        showToast("Logged out");
+        window.location.reload();
+    };
+
+    // --- ADD APPLICATION ---
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!company.trim() || !role.trim()) return;
@@ -127,12 +125,7 @@ function App() {
             const saved = await addApplication(newApp);
             setApps((prev) => [...prev, saved]);
             showToast("Application added");
-            // Reset form
-            setCompany("");
-            setRole("");
-            setStatus(0);
-            setAppliedDate(new Date().toISOString().substring(0, 10));
-            setNotes("");
+            setCompany(""); setRole(""); setStatus(0); setAppliedDate(new Date().toISOString().substring(0, 10)); setNotes("");
         } catch {
             showToast("Failed to add application", "error");
         } finally {
@@ -140,26 +133,7 @@ function App() {
         }
     };
 
-    // Delete with confirmation modal
-    const confirmDelete = (id: number) => setConfirmDeleteId(id);
-    const cancelDelete = () => setConfirmDeleteId(null);
-
-    const handleDelete = async () => {
-        if (confirmDeleteId === null) return;
-        setLoading(true);
-        try {
-            await deleteApplication(confirmDeleteId);
-            setApps((prev) => prev.filter((app) => app.id !== confirmDeleteId));
-            showToast("Application deleted");
-        } catch {
-            showToast("Failed to delete application", "error");
-        } finally {
-            setLoading(false);
-            setConfirmDeleteId(null);
-        }
-    };
-
-    // Start editing
+    // --- EDIT & DELETE HANDLERS ---
     const startEditing = (app: JobApplication) => {
         setEditingId(app.id ?? null);
         setEditCompany(app.company);
@@ -169,20 +143,13 @@ function App() {
         setEditNotes(app.notes ?? "");
     };
 
-    // Cancel editing
     const cancelEditing = () => {
         setEditingId(null);
-        setEditCompany("");
-        setEditRole("");
-        setEditStatus(0);
-        setEditAppliedDate("");
-        setEditNotes("");
+        setEditCompany(""); setEditRole(""); setEditStatus(0); setEditAppliedDate(""); setEditNotes("");
     };
 
-    // Save edit
     const saveEdit = async () => {
-        if (editingId === null) return;
-        if (!editCompany.trim() || !editRole.trim()) return;
+        if (editingId === null || !editCompany.trim() || !editRole.trim()) return;
 
         const updatedApp: JobApplication = {
             id: editingId,
@@ -195,10 +162,8 @@ function App() {
 
         setLoading(true);
         try {
-            await updateApplication(editingId, updatedApp);
-            setApps((prev) =>
-                prev.map((app) => (app.id === editingId ? updatedApp : app))
-            );
+            await updateApplication(editingId, updatedApp); // no token passed
+            setApps((prev) => prev.map((app) => (app.id === editingId ? updatedApp : app)));
             showToast("Application updated");
             cancelEditing();
         } catch {
@@ -208,299 +173,112 @@ function App() {
         }
     };
 
-    // Status Badge Component
-    function StatusBadge({ status }: { status: number }) {
+    const confirmDelete = (id: number) => setConfirmDeleteId(id);
+    const cancelDelete = () => setConfirmDeleteId(null);
+
+    const handleDelete = async () => {
+        if (confirmDeleteId === null) return;
+        setLoading(true);
+        try {
+            await deleteApplication(confirmDeleteId); // no token passed
+            setApps((prev) => prev.filter((app) => app.id !== confirmDeleteId));
+            showToast("Application deleted");
+        } catch {
+            showToast("Failed to delete application", "error");
+        } finally {
+            setLoading(false);
+            setConfirmDeleteId(null);
+        }
+    };
+
+    // --- COMPONENTS ---
+    const StatusBadge = ({ status }: { status: number }) => {
         const option = STATUS_OPTIONS.find((opt) => opt.value === status);
-        return (
-            <span className={`status-badge ${option?.colorClass}`}>
-                {option?.label}
-            </span>
-        );
-    }
+        return <span className={`status-badge ${option?.colorClass}`}>{option?.label}</span>;
+    };
+
+    // --- RENDER ---
+    if (!token) return <p>Please login to access applications.</p>;
 
     return (
         <div className="app-container">
-            <h1 className="app-title">
-                Job Applications Tracker
-            </h1>
+            <div className="header">
+                <h1 className="app-title">Job Applications Tracker</h1>
+                <button className="logout-btn" onClick={handleLogout}>Logout</button>
+            </div>
 
             {/* Filter & Sort Controls */}
             <div className="controls">
                 <label>
                     Filter by Status:
-                    <select
-                        value={filterStatus}
-                        onChange={(e) =>
-                            setFilterStatus(e.target.value === "all" ? "all" : Number(e.target.value))
-                        }
-                    >
+                    <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value === "all" ? "all" : Number(e.target.value))}>
                         <option value="all">All</option>
-                        {STATUS_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
+                        {STATUS_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                 </label>
 
                 <label>
                     Sort by:
-                    <select
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                    >
-                        {SORT_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
+                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                        {SORT_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                 </label>
             </div>
 
             {/* Add Application Form */}
             <form onSubmit={handleSubmit} className="add-application-form">
-                <div>
-                    <label htmlFor="company">Company *</label>
-                    <input
-                        id="company"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        disabled={loading}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="role">Role *</label>
-                    <input
-                        id="role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        disabled={loading}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="status">Status *</label>
-                    <select
-                        id="status"
-                        value={status}
-                        onChange={(e) => setStatus(Number(e.target.value))}
-                        disabled={loading}
-                    >
-                        {STATUS_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label htmlFor="appliedDate">Applied Date *</label>
-                    <input
-                        id="appliedDate"
-                        type="date"
-                        value={appliedDate}
-                        onChange={(e) => setAppliedDate(e.target.value)}
-                        disabled={loading}
-                        required
-                    />
-                </div>
-
-                <div className="form-notes">
-                    <label htmlFor="notes">Notes</label>
-                    <textarea
-                        id="notes"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        disabled={loading}
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading || !company.trim() || !role.trim()}
-                >
-                    {loading ? "Saving..." : "Add Application"}
-                </button>
+                <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" required disabled={loading} />
+                <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" required disabled={loading} />
+                <select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled={loading}>
+                    {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+                <input type="date" value={appliedDate} onChange={(e) => setAppliedDate(e.target.value)} required disabled={loading} />
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={loading} placeholder="Notes" />
+                <button type="submit" disabled={loading}>{loading ? "Saving..." : "Add Application"}</button>
             </form>
 
             {/* Applications List */}
-            {loading && <p className="loading-message">Loading applications...</p>}
+            <ul className="applications-list">
+                {filteredApps.map(app => (
+                    <li key={app.id} className="application-item">
+                        {editingId === app.id ? (
+                            <div className="edit-form">
+                                <input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} />
+                                <input value={editRole} onChange={(e) => setEditRole(e.target.value)} />
+                                <select value={editStatus} onChange={(e) => setEditStatus(Number(e.target.value))}>
+                                    {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                </select>
+                                <input type="date" value={editAppliedDate} onChange={(e) => setEditAppliedDate(e.target.value)} />
+                                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
+                                <button onClick={saveEdit}>Save</button>
+                                <button onClick={cancelEditing}>Cancel</button>
+                            </div>
+                        ) : (
+                            <div className="application-view">
+                                <div><strong>{app.company}</strong> - {app.role} <StatusBadge status={app.status} /></div>
+                                <div>Applied: {new Date(app.appliedDate).toLocaleDateString()}</div>
+                                {app.notes && <div>Notes: {app.notes}</div>}
+                                <div className="actions">
+                                    <button onClick={() => startEditing(app)}>Edit</button>
+                                    <button onClick={() => confirmDelete(app.id!)}>Delete</button>
+                                </div>
+                            </div>
+                        )}
+                    </li>
+                ))}
+            </ul>
 
-            {!loading && filteredApps.length === 0 && (
-                <p className="no-applications-message">No applications found.</p>
-            )}
-
-            {!loading && filteredApps.length > 0 && (
-                <ul className="applications-list">
-                    {filteredApps.map((app) => (
-                        <li key={app.id} className={`application-item ${editingId === app.id ? "editing" : ""}`}>
-                            {/* Editing mode */}
-                            {editingId === app.id ? (
-                                <>
-                                    <div className="edit-grid">
-                                        <div>
-                                            <label>Company *</label>
-                                            <input
-                                                value={editCompany}
-                                                onChange={(e) => setEditCompany(e.target.value)}
-                                                disabled={loading}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label>Role *</label>
-                                            <input
-                                                value={editRole}
-                                                onChange={(e) => setEditRole(e.target.value)}
-                                                disabled={loading}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label>Status *</label>
-                                            <select
-                                                value={editStatus}
-                                                onChange={(e) => setEditStatus(Number(e.target.value))}
-                                                disabled={loading}
-                                            >
-                                                {STATUS_OPTIONS.map((opt) => (
-                                                    <option key={opt.value} value={opt.value}>
-                                                        {opt.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label>Applied Date *</label>
-                                            <input
-                                                type="date"
-                                                value={editAppliedDate}
-                                                onChange={(e) => setEditAppliedDate(e.target.value)}
-                                                disabled={loading}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label>Notes</label>
-                                            <textarea
-                                                value={editNotes}
-                                                onChange={(e) => setEditNotes(e.target.value)}
-                                                disabled={loading}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="edit-actions">
-                                        <button
-                                            onClick={saveEdit}
-                                            disabled={loading || !editCompany.trim() || !editRole.trim()}
-                                            className="save-button"
-                                        >
-                                            Save
-                                        </button>
-                                        <button
-                                            onClick={cancelEditing}
-                                            disabled={loading}
-                                            className="cancel-button"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <h2>{app.company}</h2>
-                                    <p>
-                                        <strong>Role:</strong> {app.role}
-                                    </p>
-                                    <p>
-                                        <strong>Status:</strong> <StatusBadge status={app.status} />
-                                    </p>
-                                    <p>
-                                        <strong>Applied Date:</strong>{" "}
-                                        {new Date(app.appliedDate).toLocaleDateString()}
-                                    </p>
-                                    {app.notes && (
-                                        <p className="notes-section">
-                                            <strong>Notes:</strong> {app.notes}
-                                        </p>
-                                    )}
-
-                                    <div className="actions-container">
-                                        <button
-                                            onClick={() => startEditing(app)}
-                                            disabled={loading}
-                                            className="edit-button"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => confirmDelete(app.id!)}
-                                            disabled={loading}
-                                            className="delete-button"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Confirmation Modal */}
+            {/* Delete Confirmation */}
             {confirmDeleteId !== null && (
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="confirm-dialog-title"
-                    className="confirmation-modal-overlay"
-                >
-                    <div className="confirmation-modal-content">
-                        <h3 id="confirm-dialog-title">
-                            Confirm Delete
-                        </h3>
-                        <p>Are you sure you want to delete this application?</p>
-                        <div className="modal-actions">
-                            <button
-                                onClick={cancelDelete}
-                                disabled={loading}
-                                className="cancel-button"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                disabled={loading}
-                                className="confirm-delete-button"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
+                <div className="modal">
+                    <p>Are you sure you want to delete this application?</p>
+                    <button onClick={handleDelete}>Yes</button>
+                    <button onClick={cancelDelete}>No</button>
                 </div>
             )}
 
-            {/* Toast Notification */}
-            {toast && (
-                <div
-                    role="alert"
-                    aria-live="assertive"
-                    className={`toast-notification ${toast.type}`}
-                >
-                    {toast.message}
-                </div>
-            )}
+            {/* Toast */}
+            {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
         </div>
     );
 }
