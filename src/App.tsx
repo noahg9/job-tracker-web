@@ -116,17 +116,22 @@ function App() {
             company: company.trim(),
             role: role.trim(),
             status,
-            appliedDate: new Date(appliedDate).toISOString(),
+            appliedDate: appliedDate,
             notes: notes.trim(),
         };
+
+        console.log("handleSubmit -> newApp", newApp);
 
         setLoading(true);
         try {
             const saved = await addApplication(newApp);
+            console.log("Saved application:", saved);
+
             setApps((prev) => [...prev, saved]);
             showToast("Application added");
             setCompany(""); setRole(""); setStatus(0); setAppliedDate(new Date().toISOString().substring(0, 10)); setNotes("");
-        } catch {
+        } catch (err) {
+            console.error("Error adding application:", err);
             showToast("Failed to add application", "error");
         } finally {
             setLoading(false);
@@ -160,13 +165,18 @@ function App() {
             notes: editNotes.trim(),
         };
 
+        console.log("saveEdit -> updatedApp", updatedApp);
+
         setLoading(true);
         try {
-            await updateApplication(editingId, updatedApp); // no token passed
+            await updateApplication(editingId, updatedApp);
+            console.log("Application updated successfully");
+
             setApps((prev) => prev.map((app) => (app.id === editingId ? updatedApp : app)));
             showToast("Application updated");
             cancelEditing();
-        } catch {
+        } catch (err) {
+            console.error("Error updating application:", err);
             showToast("Failed to update application", "error");
         } finally {
             setLoading(false);
@@ -178,12 +188,17 @@ function App() {
 
     const handleDelete = async () => {
         if (confirmDeleteId === null) return;
+        console.log("handleDelete -> id", confirmDeleteId);
+
         setLoading(true);
         try {
-            await deleteApplication(confirmDeleteId); // no token passed
+            await deleteApplication(confirmDeleteId);
+            console.log("Application deleted successfully");
+
             setApps((prev) => prev.filter((app) => app.id !== confirmDeleteId));
             showToast("Application deleted");
-        } catch {
+        } catch (err) {
+            console.error("Error deleting application:", err);
             showToast("Failed to delete application", "error");
         } finally {
             setLoading(false);
