@@ -1,6 +1,6 @@
 # Job Application Tracker
 
-A web application built with and React to help you keep track of your job applications, ran using [the backend](https://github.com/noahg9/job-tracker-backend) built with .NET.
+A web app built with and React to help you keep track of your job applications, ran on [the backend](https://github.com/noahg9/job-tracker-backend) built with .NET.
 
 ---
 
@@ -25,7 +25,7 @@ A web application built with and React to help you keep track of your job applic
 
 ### Local Setup
 
-1. Clone the repository
+1. Clone the repo
 2. Run frontend:
    ```bash
    npm install
