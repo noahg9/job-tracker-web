@@ -1,1 +1,23 @@
-{"routes":[],"auth":{"rolesSource":"/api/roles","identityProviders":{"github":{"registration":{"clientIdSettingName":"GITHUB_CLIENT_ID","clientSecretSettingName":"GITHUB_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
+{
+    "routes": [
+        {
+            "route": "/api/user/login",
+            "allowedRoles": [ "anonymous" ]
+        },
+        {
+            "route": "/api/user/register",
+            "allowedRoles": [ "anonymous" ]
+        },
+        {
+            "route": "/api/*",
+            "allowedRoles": [ "authenticated" ]
+        },
+        {
+            "route": "/*",
+            "allowedRoles": [ "authenticated" ]
+        }
+    ],
+    "navigationFallback": {
+        "rewrite": "/index.html"
+    }
+}
