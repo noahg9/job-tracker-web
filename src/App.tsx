@@ -9,6 +9,7 @@ import {
 } from "./api";
 import type { JobApplication } from "./api";
 import "./App.scss";
+import { useSWAAuth } from "./hooks/useSWAAuth";
 
 const STATUS_OPTIONS = [
     { value: 0, label: "Applied", colorClass: "status-0" },
@@ -60,7 +61,7 @@ function App() {
 
     const [showAddForm, setShowAddForm] = useState(false);
 
-    const token = localStorage.getItem("token");
+    const { user, loading } = useSWAAuth();
 
     // --- TOAST ---
     const showToast = useCallback((message: string, type: ToastType = "success") => {
@@ -70,13 +71,14 @@ function App() {
 
     // --- FETCH APPLICATIONS ---
     useEffect(() => {
-        if (!token) return;
+        if (loading || !user) return;
+
         setLoading(true);
         getAllApplications()
             .then(setApps)
             .catch(() => showToast("Failed to load applications", "error"))
             .finally(() => setLoading(false));
-    }, [token, showToast]);
+    }, [user, loading, showToast]);
 
     // --- LOCAL STORAGE ---
     useEffect(() => localStorage.setItem("filterStatus", String(filterStatus)), [filterStatus]);
@@ -105,9 +107,7 @@ function App() {
 
     // --- LOGOUT ---
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        showToast("Logged out");
-        window.location.reload();
+        window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
     };
 
     // --- ADD APPLICATION ---
@@ -216,7 +216,13 @@ function App() {
     };
 
     // --- RENDER ---
-    if (!token) return <p>Please login to access applications.</p>;
+    if (loading) return <p>Loading...</p>;
+    if (!user) return (
+        <div>
+            <p>Please log in to access applications.</p>
+            <button onClick={() => window.location.href = "/.auth/login/aad?post_login_redirect_uri=/"}>Login</button>
+        </div>
+    );
 
     return (
         <div className="app-container">
