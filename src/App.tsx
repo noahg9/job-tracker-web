@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState, useCallback, useMemo } from "react";
 import type { FormEvent } from "react";
+import { Plus, Edit2, Trash2, X, Save } from "lucide-react";
 import {
     getAllApplications,
     addApplication,
@@ -56,6 +57,8 @@ function App() {
 
     const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+    const [showAddForm, setShowAddForm] = useState(false);
 
     const token = localStorage.getItem("token");
 
@@ -240,17 +243,27 @@ function App() {
                 </label>
             </div>
 
+            <button
+                className="icon-btn add-new-btn"
+                onClick={() => setShowAddForm((prev) => !prev)}
+            >
+                <Plus size={16} /> {showAddForm ? "Close" : "New Application"}
+            </button>
+
+
             {/* Add Application Form */}
-            <form onSubmit={handleSubmit} className="add-application-form">
-                <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" required disabled={loading} />
-                <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" required disabled={loading} />
-                <select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled={loading}>
-                    {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-                <input type="date" value={appliedDate} onChange={(e) => setAppliedDate(e.target.value)} required disabled={loading} />
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={loading} placeholder="Notes" />
-                <button type="submit" disabled={loading}>{loading ? "Saving..." : "Add Application"}</button>
-            </form>
+            {showAddForm && (
+                <form onSubmit={handleSubmit} className="add-application-form">
+                    <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" required disabled={loading} />
+                    <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" required disabled={loading} />
+                    <select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled={loading}>
+                        {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                    <input type="date" value={appliedDate} onChange={(e) => setAppliedDate(e.target.value)} required disabled={loading} />
+                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} disabled={loading} placeholder="Notes" />
+                    <button type="submit" disabled={loading}>{loading ? "Saving..." : "Add"}</button>
+                </form>
+            )}
 
             {/* Applications List */}
             <ul className="applications-list">
@@ -265,8 +278,12 @@ function App() {
                                 </select>
                                 <input type="date" value={editAppliedDate} onChange={(e) => setEditAppliedDate(e.target.value)} />
                                 <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
-                                <button onClick={saveEdit}>Save</button>
-                                <button onClick={cancelEditing}>Cancel</button>
+                                <button onClick={saveEdit} className="icon-btn">
+                                    <Save size={16} />
+                                </button>
+                                <button onClick={cancelEditing} className="icon-btn delete">
+                                    <X size={16} />
+                                </button>
                             </div>
                         ) : (
                             <div className="application-view">
@@ -274,8 +291,12 @@ function App() {
                                 <div>Applied: {new Date(app.appliedDate).toLocaleDateString()}</div>
                                 {app.notes && <div>Notes: {app.notes}</div>}
                                 <div className="actions">
-                                    <button onClick={() => startEditing(app)}>Edit</button>
-                                    <button onClick={() => confirmDelete(app.id!)}>Delete</button>
+                                    <button onClick={() => startEditing(app)} className="icon-btn">
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button onClick={() => confirmDelete(app.id!)} className="icon-btn delete">
+                                        <Trash2 size={16} />
+                                    </button>
                                 </div>
                             </div>
                         )}

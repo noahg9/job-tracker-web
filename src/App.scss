@@ -464,3 +464,43 @@ body.auth-page {
     min-height: 100vh;
     background-color: $background-light;
 }
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+
+    svg {
+        stroke: #444;
+    }
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    &.delete svg {
+        stroke: #d9534f; // subtle red for delete
+    }
+}
+
+.add-new-btn {
+    margin: 1rem 0;
+    font-weight: 500;
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 8px;
+
+    svg {
+        margin-right: 6px;
+    }
+
+    &:hover {
+        background: #eaeaea;
+    }
+}
