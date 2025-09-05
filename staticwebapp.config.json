@@ -1,23 +1,35 @@
 {
     "routes": [
         {
+            "route": "/api/*",
+            "allowedRoles": [ "anonymous" ]
+        },
+        {
             "route": "/",
             "allowedRoles": [ "anonymous" ]
         },
         {
-            "route": "/api/auth/login",
+            "route": "/login",
             "allowedRoles": [ "anonymous" ]
         },
         {
-            "route": "/api/auth/register",
+            "route": "/register",
             "allowedRoles": [ "anonymous" ]
         },
         {
-            "route": "/api/*",
-            "allowedRoles": [ "authenticated" ]
+            "route": "/*",
+            "allowedRoles": [ "anonymous" ]
         }
     ],
     "auth": {
-        "rolesSource": "/api/roles"
+        "rolesSource": "/api/roles",
+        "identityProviders": {
+            "github": {
+                "registration": {
+                    "clientIdSettingName": "GITHUB_CLIENT_ID",
+                    "clientSecretSettingName": "GITHUB_CLIENT_SECRET_APP_SETTING_NAME"
+                }
+            }
+        }
     }
 }
