@@ -273,19 +273,20 @@ function App() {
                     <li key={app.id} className="application-item">
                         {editingId === app.id ? (
                             <div className="edit-form">
-                                <input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} />
-                                <input value={editRole} onChange={(e) => setEditRole(e.target.value)} />
-                                <select value={editStatus} onChange={(e) => setEditStatus(Number(e.target.value))}>
-                                    {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                                </select>
-                                <input type="date" value={editAppliedDate} onChange={(e) => setEditAppliedDate(e.target.value)} />
-                                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
-                                <button onClick={saveEdit} className="icon-btn">
-                                    <Save size={16} />
-                                </button>
-                                <button onClick={cancelEditing} className="icon-btn delete">
-                                    <X size={16} />
-                                </button>
+                                <div className="edit-fields">
+                                    <input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} placeholder="Company" />
+                                    <input value={editRole} onChange={(e) => setEditRole(e.target.value)} placeholder="Role" />
+                                    <select value={editStatus} onChange={(e) => setEditStatus(Number(e.target.value))}>
+                                        {STATUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                    </select>
+                                    <input type="date" value={editAppliedDate} onChange={(e) => setEditAppliedDate(e.target.value)} />
+                                    <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} placeholder="Notes" />
+                                </div>
+
+                                <div className="edit-actions">
+                                    <button onClick={saveEdit} className="icon-btn"><Save size={16} /></button>
+                                    <button onClick={cancelEditing} className="icon-btn delete"><X size={16} /></button>
+                                </div>
                             </div>
                         ) : (
                             <div className="application-view">

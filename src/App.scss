@@ -489,7 +489,7 @@ body.auth-page {
     }
 
     &.delete svg {
-        stroke: #d9534f; // subtle red for delete
+        stroke: #d9534f;
     }
 }
 
@@ -506,5 +506,43 @@ body.auth-page {
 
     &:hover {
         background: #eaeaea;
+    }
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+
+    .edit-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+
+        input, select, textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            grid-column: span 3;
+            resize: vertical;
+            min-height: 50px;
+        }
+    }
+
+    .edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
     }
 }
