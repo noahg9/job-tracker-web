@@ -63,34 +63,38 @@ $white: white;
 
 /* --- Header --- */
 .header {
+    position: relative;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 1.5rem;
+    padding: 1rem 2rem;
+    background: #f8f8f8;
 
     .app-title {
         font-size: 2rem;
-        font-weight: 700;
-        color: $text-dark;
+        font-weight: 600;
     }
 
     .logout-btn {
-        background-color: $error-red;
-        color: $white;
+        position: absolute;
+        top: 1rem;
+        right: 2rem;
+        background: transparent;
         border: none;
-        padding: 0.4rem 0.8rem;
-        border-radius: 6px;
-        font-size: 0.9rem;
+        padding: 6px;
+        border-radius: 50%;
         cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
 
-        &:hover {
-            background-color: #f6685e;
-            transform: scale(1.05);
+        svg {
+            stroke: #d9534f;
         }
 
-        &:active {
-            transform: scale(0.98);
+        &:hover {
+            background: rgba(217, 83, 79, 0.1);
         }
     }
 }

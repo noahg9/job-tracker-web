@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState, useCallback, useMemo } from "react";
 import type { FormEvent } from "react";
-import { Plus, Edit2, Trash2, X, Save } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Save, LogOut } from "lucide-react";
 import {
     getAllApplications,
     addApplication,
@@ -222,7 +222,9 @@ function App() {
         <div className="app-container">
             <div className="header">
                 <h1 className="app-title">Job Applications Tracker</h1>
-                <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                <button className="logout-btn" onClick={handleLogout} title="Logout">
+                    <LogOut size={20} />
+                </button>
             </div>
 
             {/* Filter & Sort Controls */}
