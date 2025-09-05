@@ -1,71 +1,44 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
-        }
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await fetch("/.auth/me");
+                if (!res.ok) throw new Error("Not authenticated");
 
-        try {
-            const response = await fetch(`${API_BASE}/auth/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
+                const data = await res.json();
+                if (data && data.clientPrincipal) {
+                    navigate("/", { replace: true });
+                } else {
+                    setLoading(false);
+                }
+            } catch {
+                setLoading(false);
+            }
+        };
 
-            if (!response.ok) throw new Error("Registration failed");
+        fetchUser();
+    }, [navigate]);
 
-            navigate("/login");
-        } catch (err: any) {
-            setError(err.message);
-        }
+    const handleRegister = () => {
+        window.location.href = "/.auth/login/github?post_login_redirect_uri=/";
     };
 
+    if (loading) return <p>Loading...</p>;
+
     return (
+        <div className="auth-page-wrapper">
             <div className="auth-container">
                 <h2>Register</h2>
-                {error && <p className="error-message">{error}</p>}
-
-                <form onSubmit={handleSubmit} className="auth-form">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                    />
-                    <button type="submit">Register</button>
-                </form>
-
-                <p>
-                    Already have an account? <Link to="/login">Login</Link>
-                </p>
+                <p>Create an account to get started.</p>
+                <button onClick={handleRegister}>Register / Login</button>
             </div>
+        </div>
     );
 };
 

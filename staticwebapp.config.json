@@ -1,10 +1,6 @@
 {
     "routes": [
         {
-            "route": "/api/*",
-            "allowedRoles": [ "anonymous" ]
-        },
-        {
             "route": "/",
             "allowedRoles": [ "anonymous" ]
         },
@@ -17,17 +13,37 @@
             "allowedRoles": [ "anonymous" ]
         },
         {
+            "route": "/api/*",
+            "allowedRoles": [ "authenticated" ]
+        },
+        {
             "route": "/*",
             "allowedRoles": [ "anonymous" ]
         }
     ],
     "auth": {
-        "rolesSource": "/api/roles",
         "identityProviders": {
+            "azureActiveDirectory": {
+                "registration": {
+                    "clientIdSettingName": "AAD_CLIENT_ID",
+                    "clientSecretSettingName": "AAD_CLIENT_SECRET",
+                    "openIdIssuer": "https://login.microsoftonline.com/<TENANT_ID>/v2.0"
+                }
+            },
             "github": {
                 "registration": {
                     "clientIdSettingName": "GITHUB_CLIENT_ID",
-                    "clientSecretSettingName": "GITHUB_CLIENT_SECRET_APP_SETTING_NAME"
+                    "clientSecretSettingName": "GITHUB_CLIENT_SECRET",
+                }
+            },
+            "twitter": {
+                "registration": {
+                    "consumerSecretSettingName": "TWITTER_CONSUMER_SECRET"
+                }
+            },
+            "facebook": {
+                "registration": {
+                    "appSecretSettingName": "FACEBOOK_APP_SECRET"
                 }
             }
         }
