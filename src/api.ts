@@ -9,14 +9,6 @@ export interface JobApplication {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-function getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    return {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-    };
-}
-
 // Helper to handle and log responses
 async function handleResponse(res: Response) {
     const text = await res.text();
