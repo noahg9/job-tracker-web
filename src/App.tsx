@@ -61,7 +61,7 @@ function App() {
 
     const [showAddForm, setShowAddForm] = useState(false);
 
-    const { user, loading } = useSWAAuth();
+    const { user, loading: authLoading } = useSWAAuth();
 
     // --- TOAST ---
     const showToast = useCallback((message: string, type: ToastType = "success") => {
@@ -71,14 +71,14 @@ function App() {
 
     // --- FETCH APPLICATIONS ---
     useEffect(() => {
-        if (loading || !user) return;
+        if (authLoading || !user) return;
 
         setLoading(true);
         getAllApplications()
             .then(setApps)
             .catch(() => showToast("Failed to load applications", "error"))
             .finally(() => setLoading(false));
-    }, [user, loading, showToast]);
+    }, [user, authLoading, showToast]);
 
     // --- LOCAL STORAGE ---
     useEffect(() => localStorage.setItem("filterStatus", String(filterStatus)), [filterStatus]);
@@ -216,7 +216,7 @@ function App() {
     };
 
     // --- RENDER ---
-    if (loading) return <p>Loading...</p>;
+    if (authLoading) return <p>Loading...</p>;
     if (!user) return (
         <div>
             <p>Please log in to access applications.</p>
