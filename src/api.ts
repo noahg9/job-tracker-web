@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import { getApiBaseUrl } from "./config";
 
 export interface JobApplication {
     id?: number;
@@ -43,18 +43,22 @@ async function handleResponse(res: Response) {
     return data;
 }
 
+// --- API CALLS ---
+// Each function now fetches API_BASE at runtime
 export async function getAllApplications(): Promise<JobApplication[]> {
+    const API_BASE = await getApiBaseUrl();
     const url = `${API_BASE}/JobApplications`;
+
     console.debug("GET", url, { headers: getAuthHeaders() });
 
-    const res = await fetch(url, {
-        headers: getAuthHeaders(),
-    });
+    const res = await fetch(url, { headers: getAuthHeaders() });
     return handleResponse(res);
 }
 
 export async function addApplication(app: JobApplication): Promise<JobApplication> {
+    const API_BASE = await getApiBaseUrl();
     const url = `${API_BASE}/JobApplications`;
+
     console.debug("POST", url, { headers: getAuthHeaders(), body: app });
 
     const res = await fetch(url, {
@@ -66,7 +70,9 @@ export async function addApplication(app: JobApplication): Promise<JobApplicatio
 }
 
 export async function deleteApplication(id: number): Promise<void> {
+    const API_BASE = await getApiBaseUrl();
     const url = `${API_BASE}/JobApplications/${id}`;
+
     console.debug("DELETE", url, { headers: getAuthHeaders() });
 
     const res = await fetch(url, {
@@ -77,7 +83,9 @@ export async function deleteApplication(id: number): Promise<void> {
 }
 
 export async function updateApplication(id: number, app: JobApplication): Promise<void> {
+    const API_BASE = await getApiBaseUrl();
     const url = `${API_BASE}/JobApplications/${id}`;
+
     console.debug("PUT", url, { headers: getAuthHeaders(), body: app });
 
     const res = await fetch(url, {
