@@ -1,1 +1,1 @@
-{"routes":[],"auth":{"rolesSource":"DEFAULT","identityProviders":{"github":{"registration":{"clientIdSettingName":"GITHUB_CLIENT_ID","clientSecretSettingName":"GITHUB_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
+{"routes":[],"auth":{"rolesSource":"/api/roles","identityProviders":{"github":{"registration":{"clientIdSettingName":"GITHUB_CLIENT_ID","clientSecretSettingName":"GITHUB_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
