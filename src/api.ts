@@ -45,19 +45,20 @@ async function handleResponse(res: Response) {
 // --- API CALLS ---
 export async function getAllApplications(): Promise<JobApplication[]> {
     const url = `${API_BASE}/JobApplications`;
-    console.debug("GET", url, { headers: getAuthHeaders() });
-
-    const res = await fetch(url, { headers: getAuthHeaders() });
+    const res = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+    });
     return handleResponse(res);
 }
 
 export async function addApplication(app: JobApplication): Promise<JobApplication> {
     const url = `${API_BASE}/JobApplications`;
-    console.debug("POST", url, { headers: getAuthHeaders(), body: app });
-
     const res = await fetch(url, {
         method: "POST",
-        headers: getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(app),
     });
     return handleResponse(res);
@@ -65,22 +66,20 @@ export async function addApplication(app: JobApplication): Promise<JobApplicatio
 
 export async function deleteApplication(id: number): Promise<void> {
     const url = `${API_BASE}/JobApplications/${id}`;
-    console.debug("DELETE", url, { headers: getAuthHeaders() });
-
     const res = await fetch(url, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
     });
     await handleResponse(res);
 }
 
 export async function updateApplication(id: number, app: JobApplication): Promise<void> {
     const url = `${API_BASE}/JobApplications/${id}`;
-    console.debug("PUT", url, { headers: getAuthHeaders(), body: app });
-
     const res = await fetch(url, {
         method: "PUT",
-        headers: getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(app),
     });
     await handleResponse(res);
