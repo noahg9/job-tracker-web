@@ -1,23 +1,23 @@
 {
     "routes": [
         {
-            "route": "/api/user/login",
+            "route": "/",
             "allowedRoles": [ "anonymous" ]
         },
         {
-            "route": "/api/user/register",
+            "route": "/api/auth/login",
+            "allowedRoles": [ "anonymous" ]
+        },
+        {
+            "route": "/api/auth/register",
             "allowedRoles": [ "anonymous" ]
         },
         {
             "route": "/api/*",
             "allowedRoles": [ "authenticated" ]
-        },
-        {
-            "route": "/*",
-            "allowedRoles": [ "authenticated" ]
         }
     ],
-    "navigationFallback": {
-        "rewrite": "/index.html"
+    "auth": {
+        "rolesSource": "/api/roles"
     }
 }
